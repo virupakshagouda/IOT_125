@@ -2,8 +2,18 @@
 #include<SoftwareSerial.h>
 #include<Servo.h>
 LiquidCrystal lcd(12,11,5,4,3,2);
+LiquidCrystal lcd1(12,11,5,4,3,2);
 SoftwareSerial myserial(9,10);
-SoftwareSerial myserial1(11,12);
+Servo myservo;
+Servo myservo1;
+
+const int ProxSensor1=2;
+const int ProxSensor2=3;
+const int ProxSensor3=4;
+const int ProxSensor4=5;
+const int ProxSensor5=6;
+const int ProxSensor6=7;
+const int ProxSensor7=8;
 
 #define LEDPIN 12
 char tag[] ="3C0087D597F9"; 
@@ -13,17 +23,31 @@ char input[12];                                         // character array of si
 boolean flag = 0;                                       
 
 int pos=0;
+int count1=0;
+int count2=0;
 
 void setup()
 {
 lcd.begin(16,2);
 lcd.clear();
+lcd1.begin(16,2);
+lcd1.clear();
 
 Serial.begin(9600);                                  // begin serial port with baud rate 9600bps
 mySerial.begin(9600);
-pinMode(LEDPIN,OUTPUT); 
+
+pinMode(LEDPIN,OUTPUT); //led will glow on successfull scanning
 
 myservo.attach(9);  
+myservo1.attach(10); 
+
+pinMode(13, OUTPUT); pinMode(ProxSensor1,INPUT);
+pinMode(12, OUTPUT); pinMode(ProxSensor2,INPUT);
+pinMode(11, OUTPUT); pinMode(ProxSensor3,INPUT);
+pinMode(10, OUTPUT); pinMode(ProxSensor4,INPUT);
+pinMode(9, OUTPUT); pinMode(ProxSensor5,INPUT);
+pinMode(8, OUTPUT); pinMode(ProxSensor6,INPUT);
+pinMode(7, OUTPUT); pinMode(ProxSensor7,INPUT);
 
 }
 
@@ -46,7 +70,7 @@ void loop()
 
 if(mySerial.available())
 	{
-		count = 0; 
+		
 		while(mySerial.available() && count < 12) 
 		{
 			input[count] = mySerial.read(); 
@@ -58,9 +82,9 @@ if(mySerial.available())
 		
 		if(count == 12) 
 		{
-			count =0; 
-			flag = 1;
 			
+			flag = 1;
+			count =0;
 			while(count<12 && flag !=0)  
 			{
 				if(input[count]==tag[count])
@@ -71,7 +95,7 @@ if(mySerial.available())
 				count++; 
 			}
 		}
-		if(flag == 1) 
+		if(flag == 1 && count<3) 
 		{
 			Serial.println("Access Allowed!");
 			digitalWrite(LEDPIN,HIGH);
@@ -94,7 +118,12 @@ if(mySerial.available())
 			delay (2000);
 			digitalWrite (LEDPIN,LOW);
 		}
-		else
+
+		else if(count>2)
+{	
+	lcd.print("sorry all slots r occupied");
+{
+		else 
 		{
 			Serial.println("Access Denied"); 
 			digitalWrite(LEDPIN,LOW);
@@ -109,6 +138,114 @@ if(mySerial.available())
 		}
 		count = 0; 
 	}
+
+
+ if(digitalRead(ProxSensor1)==HIGH)     //prox
+  {
+    digitalWrite(13, HIGH);   count1=count1+1;
+  }
+  else
+  {
+    digitalWrite(13, LOW);    
+  }
+ if(digitalRead(ProxSensor2)==HIGH)     
+  {
+    digitalWrite(12, HIGH);   count1=count1+1;
+  }
+  else
+  {
+    digitalWrite(12, LOW);    
+  }
+ if(digitalRead(ProxSensor3)==HIGH)     
+  {
+    digitalWrite(11, HIGH);   count1=count1+1;
+  }
+  else
+  {
+    digitalWrite(11, LOW);    
+  }
+ if(digitalRead(ProxSensor4)==HIGH)     // place this just infront of guest parking toll gate
+ {
+    digitalWrite(10, HIGH);   count2=count2+1;
+
+	if(count2<2)				// guest toll gate opening
+	{
+	for (pos = 0; pos <= 90; pos += 1) { 
+    	myservo.write(pos);              
+    	delay(50);                       
+  	}
+  	for (pos = 90; pos >= 0; pos -= 1) { 
+  	  myservo.write(pos);              
+    	delay(15);                       
+ 	 }
+	}
+
+	else
+	{
+	lcd1.print("slots r full");
+	{
+
+
+  }
+  else
+  {
+    digitalWrite(10, LOW);    
+  }
+
+
+
+
+ if(digitalRead(ProxSensor5)==HIGH)     // place this just behind guest parking toll gate
+  {
+    digitalWrite(9, HIGH);   
+
+
+	for (pos = 0; pos <= 90; pos += 1) { 
+    	myservo.write(pos);              
+    	delay(50);                       
+  	}
+  	for (pos = 90; pos >= 0; pos -= 1) { 
+  	  myservo.write(pos);              
+    	delay(15);                       
+ 	 }
+  }
+  else
+  {
+    digitalWrite(9, LOW);    
+  }
+
+
+
+
+
+
+
+
+ if(digitalRead(ProxSensor6)==HIGH)     // place this just behind guest parking toll gate
+  {
+    digitalWrite(8, HIGH);  
+
+	for (pos = 0; pos <= 90; pos += 1) { 
+    	myservo.write(pos);              
+    	delay(50);                       
+  	}
+  	for (pos = 90; pos >= 0; pos -= 1) { 
+  	  myservo.write(pos);              
+    	delay(15);                       
+ 	 } 
+  }
+  else
+  {
+    digitalWrite(8, LOW);    
+  }
+ if(digitalRead(ProxSensor7)==HIGH)     //extra proxi
+  {
+    digitalWrite(7, HIGH);   
+  }
+  else
+  {
+    digitalWrite(7, LOW);    
+  }
 
 
 
